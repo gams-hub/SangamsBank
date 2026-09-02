@@ -1,0 +1,1747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sangam's Bank</title>
+<style>
+  :root{
+    --db-blue:#0018A8;
+    --db-blue-dark:#001070;
+    --db-blue-light:#E8EBFA;
+    --ink:#1a1a1a;
+    --grey:#6b7078;
+    --line:#d9dce3;
+    --bg:#f4f5f8;
+    --white:#ffffff;
+    --green:#0a7d33;
+    --red:#c0182b;
+    --amber:#a05a00;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:"Segoe UI",Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    font-size:15px;
+    line-height:1.5;
+  }
+  /* ---------- Header ---------- */
+  header{
+    background:var(--white);
+    border-bottom:4px solid var(--db-blue);
+    position:sticky;top:0;z-index:50;
+  }
+  .header-inner{
+    max-width:1100px;margin:0 auto;
+    display:flex;align-items:center;gap:14px;
+    padding:14px 20px;
+  }
+  .logo{
+    width:44px;height:44px;border:4px solid var(--db-blue);
+    flex-shrink:0;background:var(--white);
+    display:flex;align-items:center;justify-content:center;
+    font-size:26px;font-weight:800;color:var(--db-blue);
+    font-family:Georgia,"Times New Roman",serif;line-height:1;
+  }
+  .bank-name{font-size:22px;font-weight:700;color:var(--db-blue);letter-spacing:.3px;}
+  .bank-tag{font-size:12px;color:var(--grey);}
+  .header-right{margin-left:auto;text-align:right;font-size:12px;color:var(--grey);}
+  .header-right strong{color:var(--ink);font-size:13px;}
+
+  main{max-width:1100px;margin:0 auto;padding:24px 20px 80px;}
+  @media(min-width:1400px){ main{max-width:1300px;} }
+  @media(max-width:480px){ .cards{grid-template-columns:1fr;} }
+
+  h2{font-size:17px;font-weight:700;color:var(--db-blue);margin-bottom:12px;}
+  section{margin-bottom:28px;}
+
+  /* ---------- Rate bar ---------- */
+  .rate-bar{
+    background:var(--db-blue);color:#fff;
+    border-radius:6px;padding:14px 18px;
+    display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;
+  }
+  .rate-bar .rate-val{font-size:22px;font-weight:700;}
+  .rate-bar .rate-meta{font-size:12px;opacity:.85;}
+  .rate-bar button{
+    background:#fff;color:var(--db-blue);border:none;
+    padding:8px 14px;border-radius:4px;font-weight:700;cursor:pointer;font-size:13px;
+  }
+  .rate-bar button:hover{background:var(--db-blue-light);}
+  .rate-bar .spacer{flex:1;}
+  .badge{
+    display:inline-block;padding:2px 8px;border-radius:10px;
+    font-size:11px;font-weight:700;background:rgba(255,255,255,.18);
+  }
+
+  /* ---------- Cards ---------- */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;}
+  .acct{
+    border-radius:10px;padding:18px;color:#fff;position:relative;overflow:hidden;
+    min-height:150px;display:flex;flex-direction:column;
+  }
+  .acct .type{font-size:12px;opacity:.85;font-weight:600;}
+  .acct .name{font-size:16px;font-weight:700;margin-top:2px;}
+  .acct .bal{font-size:26px;font-weight:800;margin-top:auto;}
+  .acct .sub{font-size:12px;opacity:.9;}
+  .acct.credit{background:linear-gradient(135deg,#7a1f2b,#a8324a);}
+  .acct.debit{background:linear-gradient(135deg,#00306e,var(--db-blue));}
+  .acct.debit-usd{background:linear-gradient(135deg,#004d4d,#0a7d7d);}
+  .acct.debit-eur{background:linear-gradient(135deg,#2e0b6e,#4b1fa8);}
+  .acct.cash{background:linear-gradient(135deg,#0a5c33,#0a7d33);}
+  .acct .chip{
+    width:34px;height:24px;border-radius:4px;
+    background:linear-gradient(135deg,#e8c76a,#c9a13b);
+    position:absolute;top:18px;right:18px;
+  }
+  .acct .edit-open{
+    background:rgba(255,255,255,.18);border:none;color:#fff;
+    font-size:12px;padding:8px 12px;border-radius:4px;cursor:pointer;margin-top:6px;align-self:flex-start;
+    min-height:36px;
+  }
+  .neg{color:#ffd7d7;}
+  .stale-badge{
+    display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;
+    background:rgba(255,255,255,.9);color:var(--amber);margin-left:6px;vertical-align:middle;
+  }
+
+  /* ---------- Panels ---------- */
+  .panel{
+    background:var(--white);border:1px solid var(--line);border-radius:8px;padding:18px;
+  }
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:760px){.grid-2{grid-template-columns:1fr;}}
+
+  label{display:block;font-size:12px;font-weight:700;color:var(--grey);margin-bottom:4px;}
+  input,select,textarea{
+    width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:5px;
+    font-size:14px;font-family:inherit;background:#fff;color:var(--ink);
+    min-height:42px;
+  }
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--db-blue);outline-offset:1px;}
+  .form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:10px;}
+  .btn{
+    background:var(--db-blue);color:#fff;border:none;border-radius:5px;
+    padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;
+    min-height:44px;
+  }
+  .btn:hover{background:var(--db-blue-dark);}
+  .btn.secondary{background:#fff;color:var(--db-blue);border:2px solid var(--db-blue);}
+  .btn.secondary:hover{background:var(--db-blue-light);}
+  .btn.small{padding:6px 12px;font-size:13px;min-height:36px;}
+  .btn.danger{background:var(--red);}
+  .btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;}
+
+  /* ---------- Table ---------- */
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{
+    text-align:left;font-size:12px;color:var(--grey);
+    border-bottom:2px solid var(--db-blue);padding:8px 8px;
+  }
+  td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top;}
+  td.amt{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap;}
+  td.amt.income{color:var(--green);}
+  .pill.income{background:var(--green);}
+  .pill{
+    display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;color:#fff;
+  }
+  .pill.credit{background:#a8324a;}
+  .pill.debit{background:var(--db-blue);}
+  .pill.debit-usd{background:#0a7d7d;}
+  .pill.debit-eur{background:#4b1fa8;}
+  .pill.cash{background:var(--green);}
+  .del{
+    background:none;border:none;color:var(--red);cursor:pointer;font-size:15px;padding:2px 6px;
+  }
+  .empty{color:var(--grey);font-size:14px;padding:14px 4px;}
+
+  /* ---------- Summary ---------- */
+  .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
+  .stat{border:1px solid var(--line);border-left:4px solid var(--db-blue);border-radius:6px;padding:10px 12px;background:#fff;}
+  .stat .k{font-size:12px;color:var(--grey);font-weight:700;}
+  .stat .v{font-size:19px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums;}
+  .stat.warn{border-left-color:var(--red);}
+  .stat.ok{border-left-color:var(--green);}
+
+  textarea.io{min-height:170px;font-family:Consolas,Menlo,monospace;font-size:12.5px;white-space:pre;}
+  .hint{font-size:12px;color:var(--grey);margin-top:6px;}
+  .notice{
+    background:#fff7e6;border:1px solid #f0d9a8;color:var(--amber);
+    border-radius:6px;padding:10px 14px;font-size:13px;margin-bottom:16px;
+  }
+
+  /* ---------- Modal ---------- */
+  .overlay{
+    position:fixed;inset:0;background:rgba(0,10,60,.55);
+    display:none;align-items:center;justify-content:center;z-index:100;padding:20px;
+  }
+  .overlay.show{display:flex;}
+  .modal{
+    background:#fff;border-radius:10px;max-width:440px;width:100%;
+    padding:22px;border-top:6px solid var(--db-blue);
+  }
+  .modal h3{color:var(--db-blue);font-size:17px;margin-bottom:10px;}
+  .modal p{font-size:14px;margin-bottom:12px;}
+  .modal .big-rate{font-size:26px;font-weight:800;color:var(--db-blue);margin:6px 0 12px;}
+  .toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:var(--db-blue);color:#fff;padding:10px 20px;border-radius:6px;
+    font-size:14px;font-weight:600;display:none;z-index:200;box-shadow:0 4px 14px rgba(0,0,0,.25);
+  }
+  .toast.show{display:block;}
+
+  /* ---------- New: banner, progress bars, trend chart, budgets, archive ---------- */
+  .banner{
+    background:#fff3cd;border:1px solid #f0c96a;color:var(--amber);
+    border-radius:6px;padding:10px 14px;font-size:13px;margin-bottom:16px;
+    display:none;align-items:center;gap:10px;flex-wrap:wrap;
+  }
+  .banner.show{display:flex;}
+  .banner button{min-height:32px;padding:6px 12px;font-size:12px;}
+
+  .cap-row{
+    display:grid;grid-template-columns:120px 90px 1fr;gap:10px;align-items:center;
+    padding:8px 0;border-bottom:1px solid var(--line);
+  }
+  .cap-row:last-child{border-bottom:none;}
+  .cap-row label{margin:0;font-weight:600;color:var(--ink);font-size:13px;}
+  .cap-row input{padding:6px 8px;font-size:13px;min-height:34px;}
+  .cap-bar-wrap{background:var(--bg);border-radius:6px;height:18px;overflow:hidden;position:relative;}
+  .cap-bar-fill{height:100%;border-radius:6px;transition:width .2s;}
+  .cap-bar-text{position:absolute;inset:0;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:700;color:var(--ink);}
+
+  .trend-empty{color:var(--grey);font-size:14px;padding:20px 4px;text-align:center;}
+
+  .archive-row{
+    display:flex;justify-content:space-between;gap:10px;padding:8px 0;
+    border-bottom:1px solid var(--line);font-size:13px;flex-wrap:wrap;
+  }
+  .archive-row:last-child{border-bottom:none;}
+  .archive-row .lbl{font-weight:700;color:var(--db-blue);}
+  .archive-row .meta{color:var(--grey);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo" aria-hidden="true">S</div>
+    <div>
+      <div class="bank-name">Sangam's Bank</div>
+      <div class="bank-tag">Personal Finance · Tbilisi</div>
+    </div>
+    <div class="header-right">
+      <strong id="todayLabel">—</strong><br>
+      Account holder: Sangam Chaurasia
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <div class="notice">
+    This page keeps data <strong>in memory only</strong>. Before closing, use
+    <strong>Export for WhatsApp</strong> and send the text to yourself. Next day, paste it in
+    <strong>Import</strong> and everything is restored.
+  </div>
+
+  <div class="banner" id="unsavedBanner">
+    <span id="unsavedText">Changes not yet copied to WhatsApp.</span>
+    <button class="btn secondary" type="button" id="btnCopyFromBanner">Copy now</button>
+  </div>
+
+  <!-- ===== Rate ===== -->
+  <section>
+    <div class="rate-bar">
+      <div>
+        <div class="rate-val">1 GEL = <span id="rateDisplay">—</span> INR<span class="stale-badge" id="rateStale" style="display:none;"></span></div>
+        <div class="rate-val" style="font-size:15px;font-weight:600;opacity:.9;">1 INR = <span id="rateDisplayInv">—</span> GEL</div>
+        <div class="rate-meta" id="rateMeta">Loading live rate…</div>
+      </div>
+      <span class="badge" id="rateBadge">…</span>
+      <div class="spacer"></div>
+      <button id="btnReloadRate" type="button">⟳ Reload rate</button>
+      <button id="btnManualRate" type="button">Set card rate</button>
+    </div>
+  </section>
+
+  <!-- ===== FX rates (debit cards) ===== -->
+  <section>
+    <div class="rate-bar" style="background:linear-gradient(135deg,#00306e,var(--db-blue));">
+      <div>
+        <div class="rate-val" style="font-size:17px;">1 GEL = <span id="usdDisplay">—</span> USD<span class="stale-badge" id="usdStale" style="display:none;"></span></div>
+        <div class="rate-val" style="font-size:14px;font-weight:600;opacity:.9;">1 USD = <span id="usdDisplayInv">—</span> GEL</div>
+      </div>
+      <div>
+        <div class="rate-val" style="font-size:17px;">1 GEL = <span id="eurDisplay">—</span> EUR<span class="stale-badge" id="eurStale" style="display:none;"></span></div>
+        <div class="rate-val" style="font-size:14px;font-weight:600;opacity:.9;">1 EUR = <span id="eurDisplayInv">—</span> GEL</div>
+      </div>
+      <div class="rate-meta" id="fxMeta" style="flex-basis:100%;">Loading live FX rates…</div>
+      <div class="spacer"></div>
+      <button id="btnReloadFX" type="button">⟳ Reload FX</button>
+      <button id="btnManualUSD" type="button">Set USD rate</button>
+      <button id="btnManualEUR" type="button">Set EUR rate</button>
+    </div>
+    <div class="hint">Same Visa/Mastercard network rate applies to both the TBC and BOG debit cards, so this updates once for both.</div>
+  </section>
+
+  <!-- ===== Accounts ===== -->
+  <section>
+    <h2>Your accounts</h2>
+    <div class="cards">
+      <div class="acct credit">
+        <div class="chip"></div>
+        <div class="type">CREDIT CARD · INR</div>
+        <div class="name">IndusInd Credit Card</div>
+        <div class="bal" id="creditBal">—</div>
+        <div class="sub" id="creditSub">limit = 400 GEL worth of INR</div>
+      </div>
+      <div class="acct debit">
+        <div class="chip"></div>
+        <div class="type">DEBIT CARD · GEL</div>
+        <div class="name">TBC / BOG Debit (GEL)</div>
+        <div class="bal" id="debitGELBal">—</div>
+        <div class="sub" id="debitGELSub">—</div>
+        <button class="edit-open" type="button" data-which="debitGEL">Edit opening balance</button>
+      </div>
+      <div class="acct debit-usd">
+        <div class="chip"></div>
+        <div class="type">DEBIT CARD · USD</div>
+        <div class="name">TBC / BOG Debit (USD)</div>
+        <div class="bal" id="debitUSDBal">—</div>
+        <div class="sub" id="debitUSDSub">—</div>
+        <button class="edit-open" type="button" data-which="debitUSD">Edit opening balance</button>
+      </div>
+      <div class="acct debit-eur">
+        <div class="chip"></div>
+        <div class="type">DEBIT CARD · EUR</div>
+        <div class="name">TBC / BOG Debit (EUR)</div>
+        <div class="bal" id="debitEURBal">—</div>
+        <div class="sub" id="debitEURSub">—</div>
+        <button class="edit-open" type="button" data-which="debitEUR">Edit opening balance</button>
+      </div>
+      <div class="acct cash">
+        <div class="type">CASH · GEL</div>
+        <div class="name">Cash in hand</div>
+        <div class="bal" id="cashBal">—</div>
+        <div class="sub" id="cashSub">—</div>
+        <button class="edit-open" type="button" data-which="cash">Edit opening balance</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Add expense / income ===== -->
+  <section>
+    <h2>Add expense or income</h2>
+    <div class="panel">
+      <div class="form-row">
+        <div>
+          <label for="expType">Type</label>
+          <select id="expType">
+            <option value="expense">Expense (money out)</option>
+            <option value="income">Income (money in)</option>
+          </select>
+        </div>
+        <div>
+          <label for="expDate">Date</label>
+          <input type="date" id="expDate">
+        </div>
+        <div>
+          <label for="expAccount" id="expAccountLabel">Paid with</label>
+          <select id="expAccount">
+            <option value="credit">IndusInd Credit (INR)</option>
+            <option value="debitGEL">TBC/BOG Debit (GEL)</option>
+            <option value="debitUSD">TBC/BOG Debit (USD)</option>
+            <option value="debitEUR">TBC/BOG Debit (EUR)</option>
+            <option value="cash">Cash (GEL)</option>
+          </select>
+        </div>
+        <div id="expCurrencyWrap" style="display:none;">
+          <label for="expCurrency" id="expCurrencyLabel">Currency of purchase</label>
+          <select id="expCurrency">
+            <option value="GEL">GEL (direct)</option>
+            <option value="USD">USD (auto-converts to GEL)</option>
+            <option value="EUR">EUR (auto-converts to GEL)</option>
+          </select>
+        </div>
+        <div id="expCategoryWrap">
+          <label for="expCategory">Category</label>
+          <select id="expCategory">
+            <option>Groceries</option>
+            <option>Rent</option>
+            <option>OTT / Magti</option>
+            <option>Bank</option>
+            <option>Utility</option>
+            <option>Transport</option>
+            <option>Eating out</option>
+            <option>Study</option>
+            <option>Misc</option>
+          </select>
+        </div>
+        <div id="incCategoryWrap" style="display:none;">
+          <label for="incCategory">Income type</label>
+          <select id="incCategory">
+            <option>Salary</option>
+            <option>Family transfer</option>
+            <option>Card repayment</option>
+            <option>Refund</option>
+            <option>Other income</option>
+          </select>
+        </div>
+        <div>
+          <label for="expAmount" id="expAmountLabel">Amount (GEL)</label>
+          <input type="number" id="expAmount" min="0" step="0.01" placeholder="0.00">
+        </div>
+      </div>
+      <div class="form-row">
+        <div style="grid-column:1/-1;">
+          <label for="expNote">Note (optional)</label>
+          <input type="text" id="expNote" placeholder="e.g. milk, cheese, metro top-up">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" type="button" id="btnAdd">Add expense</button>
+      </div>
+      <div class="hint" id="expHint">Credit card entries: you type the amount in GEL, it is converted to INR at the confirmed card rate and deducted from the IndusInd balance.</div>
+      <div class="hint" id="expRatePreview" style="font-weight:700;color:var(--db-blue);margin-top:2px;"></div>
+    </div>
+  </section>
+
+  <!-- ===== Summary ===== -->
+  <section>
+    <h2 style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <span>This month at a glance</span>
+      <button class="btn small secondary" type="button" id="btnSetBudget">Set monthly budget</button>
+    </h2>
+    <div class="summary-grid" id="summaryGrid"></div>
+  </section>
+
+  <!-- ===== Spending trend ===== -->
+  <section>
+    <h2>Spending trend</h2>
+    <div class="panel">
+      <div id="trendChart"></div>
+    </div>
+  </section>
+
+  <!-- ===== Category budgets ===== -->
+  <section>
+    <h2>Category budgets</h2>
+    <div class="panel">
+      <div class="hint" style="margin-top:0;margin-bottom:10px;">Caps are always in <strong>GEL</strong>. Any USD or EUR purchase is converted to GEL using the exchange rate that was active at the moment you added it — not today's rate — so these totals reflect what you actually spent. (Rent isn't shown here since it's a fixed bill, not a discretionary budget — you can still log it under Transactions.)</div>
+      <div id="categoryCapsContainer"></div>
+    </div>
+  </section>
+
+  <!-- ===== Transactions ===== -->
+  <section>
+    <h2>Transactions</h2>
+    <div class="panel" style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th><th>Account</th><th>Category</th><th>Note</th>
+            <th style="text-align:right;">Amount</th><th style="text-align:right;">Converted</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="txBody"></tbody>
+      </table>
+      <div class="empty" id="txEmpty">No expenses yet. Add one above, or import yesterday's data below.</div>
+    </div>
+  </section>
+
+  <!-- ===== Month-end ===== -->
+  <section>
+    <h2>Month-end</h2>
+    <div class="panel">
+      <div class="hint" style="margin-top:0;">Archives this month's totals, carries forward whatever's left in each account as the new opening balance, and clears the transaction list for a fresh start. Rates, budget and category caps stay as they are.</div>
+      <div class="btn-row">
+        <button class="btn" type="button" id="btnRollover">Archive month &amp; start fresh</button>
+      </div>
+      <div id="archiveList" style="margin-top:14px;"></div>
+    </div>
+  </section>
+
+  <!-- ===== Export / Import ===== -->
+  <section>
+    <h2>Save &amp; restore (WhatsApp)</h2>
+    <div class="grid-2">
+      <div class="panel">
+        <label for="exportBox">Export — copy this and WhatsApp it to yourself</label>
+        <textarea class="io" id="exportBox" readonly></textarea>
+        <div class="btn-row">
+          <button class="btn" type="button" id="btnCopy">Copy text</button>
+          <button class="btn secondary" type="button" id="btnWhatsApp">Open in WhatsApp</button>
+        </div>
+      </div>
+      <div class="panel">
+        <label for="importBox">Import — paste yesterday's text here</label>
+        <textarea class="io" id="importBox" placeholder="Paste the full 'SANGAM'S BANK' text you saved on WhatsApp…"></textarea>
+        <div class="btn-row">
+          <button class="btn" type="button" id="btnImport">Import &amp; update everything</button>
+          <button class="btn danger" type="button" id="btnClear">Clear all data</button>
+        </div>
+        <div class="hint" id="importResultHint">Importing replaces the current data with the pasted data. Lines it doesn't recognise are simply ignored, so extra WhatsApp text around it is fine.</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== Rate confirm modal ===== -->
+<div class="overlay" id="rateOverlay">
+  <div class="modal">
+    <h3 id="rateModalTitle">Confirm your card's rate</h3>
+    <p id="rateModalText">Live market rate GEL → INR:</p>
+    <div class="big-rate" id="rateModalValue">—</div>
+    <div class="hint" id="rateModalValueInv" style="margin-bottom:10px;"></div>
+    <p id="rateModalCardText">Is this the rate your <strong>IndusInd credit card</strong> is using? Card rates often differ slightly from the market rate.</p>
+    <div class="btn-row">
+      <button class="btn" type="button" id="btnRateYes">Yes, use this rate</button>
+      <button class="btn secondary" type="button" id="btnRateNo">No, enter card rate</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Manual rate modal ===== -->
+<div class="overlay" id="manualOverlay">
+  <div class="modal">
+    <h3 id="manualTitle">Enter your card's rate</h3>
+    <p id="manualIntro">Card statements show the rate either way round — pick whichever one your screen shows.</p>
+    <label for="manualDirection">Rate is given as</label>
+    <select id="manualDirection">
+      <option value="fwd">— per 1 GEL</option>
+      <option value="rev">GEL per 1 —</option>
+    </select>
+    <div style="height:10px;"></div>
+    <label for="manualRateInput" id="manualRateLabel">Value</label>
+    <input type="number" id="manualRateInput" min="0" step="0.0000001" placeholder="e.g. 32.50">
+    <div class="hint" id="manualPreview"></div>
+    <div class="btn-row">
+      <button class="btn" type="button" id="btnManualSave">Save rate</button>
+      <button class="btn secondary" type="button" id="btnManualCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ===== Generic value-input modal (replaces prompt()) ===== -->
+<div class="overlay" id="valueOverlay">
+  <div class="modal">
+    <h3 id="valueModalTitle">Edit value</h3>
+    <p id="valueModalDesc"></p>
+    <label for="valueModalInput" id="valueModalLabel">Value</label>
+    <input type="number" id="valueModalInput" step="0.01">
+    <div class="btn-row">
+      <button class="btn" type="button" id="btnValueSave">Save</button>
+      <button class="btn secondary" type="button" id="btnValueCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Generic confirm modal (replaces confirm()) ===== -->
+<div class="overlay" id="confirmOverlay">
+  <div class="modal">
+    <h3 id="confirmModalTitle">Are you sure?</h3>
+    <p id="confirmModalDesc"></p>
+    <div class="btn-row">
+      <button class="btn" type="button" id="btnConfirmYes">Yes</button>
+      <button class="btn secondary" type="button" id="btnConfirmNo">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ================= State ================= */
+var state = {
+  rate: null,               // INR per 1 GEL (confirmed for the IndusInd card)
+  rateSource: "none",       // "live-confirmed" | "manual" | "imported"
+  usdRate: null,            // USD per 1 GEL (shared Visa/Mastercard market rate)
+  eurRate: null,            // EUR per 1 GEL (shared Visa/Mastercard market rate)
+  rateSetAt: {INR: null, USD: null, EUR: null}, // todayStr() when each rate was last confirmed/set
+  creditLimitGEL: 400,
+  openingDebitGEL: 0,
+  openingDebitUSD: 0,
+  openingDebitEUR: 0,
+  openingCash: 0,
+  monthlyBudgetGEL: 0,       // 0 = not set
+  categoryCaps: {},          // category -> GEL cap
+  monthArchive: [],          // [{label, archivedAt, totalGEL, creditGEL, debitGEL, debitUSD, debitEUR, cashGEL}]
+  expenses: []               // {date, account, category, note, amount, currency} — amount is in `currency`, deducted from `account`'s balance
+};
+
+var liveRate = null;       // last fetched market INR/GEL rate (before confirmation)
+var unsavedChanges = 0;    // bumped on every mutating action, reset on copy/WhatsApp/import
+var CATEGORY_LIST = ["Groceries","OTT / Magti","Bank","Utility","Transport","Eating out","Study","Misc"]; // Rent excluded — it's a fixed bill, not a discretionary budget
+
+function toGEL(amount, currency, rateOverride){
+  if (currency === "USD"){
+    var ru = (rateOverride !== undefined && rateOverride !== null) ? rateOverride : state.usdRate;
+    return ru ? amount / ru : amount;
+  }
+  if (currency === "EUR"){
+    var re = (rateOverride !== undefined && rateOverride !== null) ? rateOverride : state.eurRate;
+    return re ? amount / re : amount;
+  }
+  return amount; // GEL
+}
+function bump(){ unsavedChanges++; }
+function slugify(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,""); }
+function daysInMonth(y, m){ return new Date(y, m+1, 0).getDate(); }
+function daysSince(dateStr){
+  if (!dateStr) return null;
+  var d1 = new Date(dateStr + "T00:00:00");
+  var d2 = new Date(todayStr() + "T00:00:00");
+  return Math.round((d2 - d1) / 86400000);
+}
+function simpleChecksum(str){
+  var h = 0;
+  for (var i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) >>> 0; }
+  return h;
+}
+function findDuplicate(date, category, amount, currency, type){
+  for (var i=0;i<state.expenses.length;i++){
+    var e = state.expenses[i];
+    var eType = e.type || "expense";
+    if (e.date === date && e.category === category && e.currency === currency && eType === (type || "expense") && Math.abs(e.amount - amount) < 0.005){
+      return true;
+    }
+  }
+  return false;
+}
+
+/* ================= Helpers ================= */
+function $(id){ return document.getElementById(id); }
+function fmt(n, dec){
+  if (n === null || n === undefined || isNaN(n)) return "—";
+  return Number(n).toLocaleString("en-IN", {minimumFractionDigits: dec, maximumFractionDigits: dec});
+}
+function todayStr(){
+  var d = new Date();
+  var m = String(d.getMonth()+1).padStart(2,"0");
+  var day = String(d.getDate()).padStart(2,"0");
+  return d.getFullYear() + "-" + m + "-" + day;
+}
+function toast(msg){
+  var t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toast._h);
+  toast._h = setTimeout(function(){ t.classList.remove("show"); }, 2600);
+}
+
+/* ================= Rate fetching ================= */
+var confirmQueue = [];    // array of {currency, liveVal}
+var confirmIndex = 0;
+var inQueueFlow = false;  // true while btnRateNo→manual save should advance the queue
+
+function fetchRate(currencies){
+  // currencies: array like ["INR"], ["USD","EUR"], or ["INR","USD","EUR"]
+  $("rateMeta").textContent = "Fetching live GEL → INR rate…";
+  $("fxMeta").textContent = "Fetching live GEL → USD/EUR rates…";
+  var done = false;
+
+  function startQueue(liveINR, liveUSD, liveEUR){
+    confirmQueue = [];
+    for (var i=0;i<currencies.length;i++){
+      var cur = currencies[i];
+      var val = cur === "INR" ? liveINR : (cur === "USD" ? liveUSD : liveEUR);
+      if (val !== null && val !== undefined){ confirmQueue.push({currency: cur, liveVal: val}); }
+    }
+    confirmIndex = 0;
+    processNextConfirm();
+  }
+
+  function fail(){
+    if (done) return;
+    done = true;
+    $("rateMeta").textContent = "Couldn't fetch live rate (offline or blocked). Please set your card rate manually.";
+    $("fxMeta").textContent = "Couldn't fetch live FX rates (offline or blocked). Debit balances still work in native currency.";
+    // Fall back to manual entry for whichever requested currencies still have no rate
+    var missing = currencies.filter(function(cur){
+      if (cur === "INR") return state.rate === null;
+      if (cur === "USD") return state.usdRate === null;
+      return state.eurRate === null;
+    });
+    if (missing.length){
+      inQueueFlow = false;
+      openManualModal(missing[0]);
+    }
+  }
+
+  fetch("https://open.er-api.com/v6/latest/GEL")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (done) return;
+      done = true;
+      var liveINR = (d && d.rates && typeof d.rates.INR === "number") ? d.rates.INR : null;
+      var liveUSD = (d && d.rates && typeof d.rates.USD === "number") ? d.rates.USD : null;
+      var liveEUR = (d && d.rates && typeof d.rates.EUR === "number") ? d.rates.EUR : null;
+      var now = new Date().toLocaleTimeString();
+      if (liveINR !== null){ liveRate = liveINR; $("rateMeta").textContent = "Live market rate fetched " + now; }
+      if (liveUSD !== null || liveEUR !== null){ $("fxMeta").textContent = "Live market rate fetched " + now; }
+      if (liveINR === null && currencies.indexOf("INR") !== -1 && currencies.length === 1){ fail(); return; }
+      startQueue(liveINR, liveUSD, liveEUR);
+    })
+    .catch(function(){
+      // Fallback source (INR only — frankfurter.app doesn't reliably quote GEL as a base for USD/EUR)
+      fetch("https://api.frankfurter.app/latest?from=GEL&to=INR")
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          if (done) return;
+          done = true;
+          var liveINR = (d && d.rates && typeof d.rates.INR === "number") ? d.rates.INR : null;
+          if (liveINR !== null){ liveRate = liveINR; $("rateMeta").textContent = "Live market rate fetched " + new Date().toLocaleTimeString(); }
+          $("fxMeta").textContent = "Couldn't fetch live FX rates (offline or blocked). Debit balances still work in native currency.";
+          startQueue(liveINR, null, null);
+        })
+        .catch(fail);
+    });
+}
+
+function processNextConfirm(){
+  if (confirmIndex >= confirmQueue.length){
+    confirmQueue = [];
+    confirmIndex = 0;
+    inQueueFlow = false;
+    return;
+  }
+  inQueueFlow = true;
+  var item = confirmQueue[confirmIndex];
+  showConfirmModal(item.currency, item.liveVal);
+}
+
+function showConfirmModal(currency, liveVal){
+  currentConfirmCurrency = currency;
+  currentConfirmLiveVal = liveVal;
+  var cardLabel = currency === "INR" ? "IndusInd credit card" : "TBC/BOG debit card (Visa/Mastercard rate)";
+  $("rateModalTitle").textContent = "Confirm the " + currency + " rate";
+  $("rateModalText").textContent = "Live market rate GEL → " + currency + ":";
+  $("rateModalValue").textContent = "1 GEL = " + fmt(liveVal, 4) + " " + currency;
+  $("rateModalValueInv").textContent = "(that's 1 " + currency + " = " + fmt(1/liveVal, 7) + " GEL)";
+  $("rateModalCardText").innerHTML = "Is this the rate your <strong>" + cardLabel + "</strong> is using? Card rates often differ slightly from the market rate.";
+  $("rateOverlay").classList.add("show");
+}
+
+var manualCurrency = "INR"; // which currency the open manual modal is editing: "INR" | "USD" | "EUR"
+var currentConfirmCurrency = "INR";
+var currentConfirmLiveVal = null;
+
+function openManualModal(currency){
+  manualCurrency = currency || "INR";
+  var current = manualCurrency === "INR" ? state.rate : (manualCurrency === "USD" ? state.usdRate : state.eurRate);
+  var cardLabel = manualCurrency === "INR" ? "IndusInd credit card" : "TBC/BOG debit card (Visa/Mastercard rate)";
+  $("manualTitle").textContent = "Enter the " + manualCurrency + " rate";
+  $("manualIntro").textContent = "Card statements show the rate either way round — pick whichever one your " + cardLabel + " screen shows.";
+  $("manualDirection").options[0].text = manualCurrency + " per 1 GEL (e.g. 1 GEL = 32.50 " + manualCurrency + ")";
+  $("manualDirection").options[1].text = "GEL per 1 " + manualCurrency + " (e.g. 1 " + manualCurrency + " = 0.0271690 GEL)";
+  $("manualDirection").value = "fwd";
+  $("manualRateInput").value = current !== null ? current : "";
+  updateManualLabel();
+  $("manualOverlay").classList.add("show");
+}
+function updateManualLabel(){
+  var dir = $("manualDirection").value;
+  var label = $("manualRateLabel");
+  var input = $("manualRateInput");
+  if (dir === "fwd"){
+    label.textContent = manualCurrency + " per 1 GEL";
+    input.placeholder = "e.g. 32.50";
+  } else {
+    label.textContent = "GEL per 1 " + manualCurrency;
+    input.placeholder = "e.g. 0.0271690";
+  }
+  updateManualPreview();
+}
+function updateManualPreview(){
+  var dir = $("manualDirection").value;
+  var v = parseFloat($("manualRateInput").value);
+  var box = $("manualPreview");
+  if (isNaN(v) || v <= 0){ box.textContent = ""; return; }
+  if (dir === "fwd"){
+    box.textContent = "= 1 " + manualCurrency + " = " + fmt(1/v, 7) + " GEL";
+  } else {
+    box.textContent = "= 1 GEL = " + fmt(1/v, 4) + " " + manualCurrency;
+  }
+}
+
+/* ================= Generic modals (replace prompt()/confirm()) ================= */
+var valueModalCallback = null;
+function openValueModal(title, desc, label, currentValue, onSave){
+  $("valueModalTitle").textContent = title;
+  $("valueModalDesc").textContent = desc;
+  $("valueModalLabel").textContent = label;
+  $("valueModalInput").value = (currentValue !== null && currentValue !== undefined) ? currentValue : "";
+  valueModalCallback = onSave;
+  $("valueOverlay").classList.add("show");
+}
+
+var confirmModalCallback = null;
+function openConfirmModal(title, desc, yesLabel, onYes){
+  $("confirmModalTitle").textContent = title;
+  $("confirmModalDesc").textContent = desc;
+  $("btnConfirmYes").textContent = yesLabel || "Yes";
+  confirmModalCallback = onYes;
+  $("confirmOverlay").classList.add("show");
+}
+
+/* ================= Calculations ================= */
+function renderStaleBadge(elId, dateStr){
+  var el = $(elId);
+  var age = daysSince(dateStr);
+  if (age === null){
+    el.textContent = "⚠ not set";
+    el.style.display = "";
+  } else if (age >= 3){
+    el.textContent = "⚠ " + age + "d old";
+    el.style.display = "";
+  } else {
+    el.style.display = "none";
+  }
+}
+
+function totals(){
+  var t = {creditGEL:0, debitGEL:0, debitUSD:0, debitEUR:0, cashGEL:0, byCat:{}, allGEL:0, incomeGEL:0,
+           spent:{credit:0, debitGEL:0, debitUSD:0, debitEUR:0, cash:0},
+           income:{credit:0, debitGEL:0, debitUSD:0, debitEUR:0, cash:0}};
+  for (var i=0;i<state.expenses.length;i++){
+    var e = state.expenses[i];
+    var a = Number(e.amount) || 0;
+    var curr = e.currency || accountUnit(e.account);
+    var gelEquiv = toGEL(a, curr, e.rateUsed);
+    var isIncome = (e.type === "income");
+    var sign = isIncome ? -1 : 1; // income reduces "spent", i.e. adds to the balance
+    var bucket = isIncome ? t.income : t.spent;
+
+    if (e.account === "credit"){ t.creditGEL += sign * a; bucket.credit += a; }
+    else if (e.account === "debitGEL"){ t.debitGEL += sign * gelEquiv; bucket.debitGEL += gelEquiv; }
+    else if (e.account === "debitUSD"){ t.debitUSD += sign * a; bucket.debitUSD += a; }
+    else if (e.account === "debitEUR"){ t.debitEUR += sign * a; bucket.debitEUR += a; }
+    else { t.cashGEL += sign * a; bucket.cash += a; }
+
+    if (isIncome){
+      t.incomeGEL += gelEquiv;
+    } else {
+      t.byCat[e.category] = (t.byCat[e.category] || 0) + gelEquiv;
+      t.allGEL += gelEquiv;
+    }
+  }
+  return t;
+}
+
+/* ================= Rendering ================= */
+function renderAll(){
+  var t = totals();
+  var r = state.rate;
+  var ur = state.usdRate;
+  var er = state.eurRate;
+
+  // Rate bar (INR)
+  $("rateDisplay").textContent = r !== null ? fmt(r, 4) : "—";
+  $("rateDisplayInv").textContent = r !== null && r > 0 ? fmt(1/r, 7) : "—";
+  $("rateBadge").textContent =
+    state.rateSource === "live-confirmed" ? "confirmed live rate" :
+    state.rateSource === "manual" ? "card rate (manual)" :
+    state.rateSource === "imported" ? "rate from import" : "no rate set";
+  renderStaleBadge("rateStale", state.rateSetAt.INR);
+
+  // FX bar (USD / EUR)
+  $("usdDisplay").textContent = ur !== null ? fmt(ur, 4) : "—";
+  $("usdDisplayInv").textContent = ur !== null && ur > 0 ? fmt(1/ur, 4) : "—";
+  $("eurDisplay").textContent = er !== null ? fmt(er, 4) : "—";
+  $("eurDisplayInv").textContent = er !== null && er > 0 ? fmt(1/er, 4) : "—";
+  renderStaleBadge("usdStale", state.rateSetAt.USD);
+  renderStaleBadge("eurStale", state.rateSetAt.EUR);
+
+  // Credit card
+  if (r !== null){
+    var limitINR = state.creditLimitGEL * r;
+    var spentINR = t.creditGEL * r;
+    var leftINR = limitINR - spentINR;
+    $("creditBal").textContent = "₹ " + fmt(leftINR, 2);
+    $("creditBal").classList.toggle("neg", leftINR < 0);
+    $("creditSub").textContent =
+      "of ₹ " + fmt(limitINR, 2) + " (= " + state.creditLimitGEL + " GEL) · spent " +
+      fmt(t.spent.credit, 2) + " GEL ≈ ₹ " + fmt(t.spent.credit * r, 2) +
+      (t.income.credit > 0 ? " · repaid " + fmt(t.income.credit, 2) + " GEL" : "");
+  } else {
+    $("creditBal").textContent = "set rate first";
+    $("creditSub").textContent = "limit = " + state.creditLimitGEL + " GEL worth of INR";
+  }
+
+  // Debit — GEL
+  var debitGELLeft = state.openingDebitGEL - t.debitGEL;
+  $("debitGELBal").textContent = fmt(debitGELLeft, 2) + " GEL";
+  $("debitGELBal").classList.toggle("neg", debitGELLeft < 0);
+  $("debitGELSub").textContent = "opening " + fmt(state.openingDebitGEL, 2) + " GEL · spent " + fmt(t.spent.debitGEL, 2) + " GEL" +
+    (t.income.debitGEL > 0 ? " · in +" + fmt(t.income.debitGEL, 2) + " GEL" : "");
+
+  // Debit — USD
+  var debitUSDLeft = state.openingDebitUSD - t.debitUSD;
+  $("debitUSDBal").textContent = "$ " + fmt(debitUSDLeft, 2);
+  $("debitUSDBal").classList.toggle("neg", debitUSDLeft < 0);
+  $("debitUSDSub").textContent = "opening $" + fmt(state.openingDebitUSD, 2) + " · spent $" + fmt(t.spent.debitUSD, 2) +
+    (ur ? " ≈ " + fmt(t.spent.debitUSD/ur, 2) + " GEL" : "") +
+    (t.income.debitUSD > 0 ? " · in +$" + fmt(t.income.debitUSD, 2) : "");
+
+  // Debit — EUR
+  var debitEURLeft = state.openingDebitEUR - t.debitEUR;
+  $("debitEURBal").textContent = "€ " + fmt(debitEURLeft, 2);
+  $("debitEURBal").classList.toggle("neg", debitEURLeft < 0);
+  $("debitEURSub").textContent = "opening €" + fmt(state.openingDebitEUR, 2) + " · spent €" + fmt(t.spent.debitEUR, 2) +
+    (er ? " ≈ " + fmt(t.spent.debitEUR/er, 2) + " GEL" : "") +
+    (t.income.debitEUR > 0 ? " · in +€" + fmt(t.income.debitEUR, 2) : "");
+
+  // Cash
+  var cashLeft = state.openingCash - t.cashGEL;
+  $("cashBal").textContent = fmt(cashLeft, 2) + " GEL";
+  $("cashBal").classList.toggle("neg", cashLeft < 0);
+  $("cashSub").textContent = "opening " + fmt(state.openingCash, 2) + " GEL · spent " + fmt(t.spent.cash, 2) + " GEL" +
+    (t.income.cash > 0 ? " · in +" + fmt(t.income.cash, 2) + " GEL" : "");
+
+  // Summary
+  var sg = $("summaryGrid");
+  sg.innerHTML = "";
+  if (state.monthlyBudgetGEL > 0){
+    var today = new Date();
+    var monthPrefix = todayStr().slice(0,7);
+    var thisMonthGEL = 0;
+    for (var mi=0; mi<state.expenses.length; mi++){
+      var me = state.expenses[mi];
+      if (me.date.slice(0,7) === monthPrefix && me.type !== "income"){
+        thisMonthGEL += toGEL(Number(me.amount)||0, me.currency || accountUnit(me.account), me.rateUsed);
+      }
+    }
+    var daysTotal = daysInMonth(today.getFullYear(), today.getMonth());
+    var daysLeft = daysTotal - today.getDate() + 1;
+    var remaining = state.monthlyBudgetGEL - thisMonthGEL;
+    if (remaining < 0){
+      addStat(sg, "Monthly budget", "Over by " + fmt(-remaining,2) + " GEL", "warn");
+    } else {
+      var perDay = daysLeft > 0 ? remaining/daysLeft : remaining;
+      addStat(sg, "Monthly budget", fmt(remaining,2) + " GEL left · " + daysLeft + "d · ~" + fmt(perDay,2) + " GEL/day", "ok");
+    }
+  }
+  addStat(sg, "Total spent", fmt(t.allGEL, 2) + " GEL", "");
+  if (t.incomeGEL > 0){
+    addStat(sg, "Income added", "+" + fmt(t.incomeGEL, 2) + " GEL", "ok");
+  }
+  addStat(sg, "Credit spent", fmt(t.spent.credit, 2) + " GEL" + (r!==null ? " ≈ ₹" + fmt(t.spent.credit*r,0) : ""), "");
+  addStat(sg, "Debit GEL spent", fmt(t.spent.debitGEL, 2) + " GEL", "");
+  addStat(sg, "Debit USD spent", "$" + fmt(t.spent.debitUSD, 2) + (ur ? " ≈ " + fmt(t.spent.debitUSD/ur,2) + " GEL" : ""), "");
+  addStat(sg, "Debit EUR spent", "€" + fmt(t.spent.debitEUR, 2) + (er ? " ≈ " + fmt(t.spent.debitEUR/er,2) + " GEL" : ""), "");
+  addStat(sg, "Cash spent", fmt(t.spent.cash, 2) + " GEL", "");
+  var cats = Object.keys(t.byCat).sort(function(a,b){ return t.byCat[b]-t.byCat[a]; });
+  for (var i=0;i<cats.length;i++){
+    addStat(sg, cats[i], fmt(t.byCat[cats[i]], 2) + " GEL", "ok");
+  }
+
+  // Table
+  var body = $("txBody");
+  body.innerHTML = "";
+  var sorted = state.expenses.slice().sort(function(a,b){
+    return a.date < b.date ? 1 : (a.date > b.date ? -1 : 0);
+  });
+  var acctInfo = {
+    credit:   {label:"IndusInd",     pill:"credit"},
+    debitGEL: {label:"TBC/BOG GEL",  pill:"debit"},
+    debitUSD: {label:"TBC/BOG USD",  pill:"debit-usd"},
+    debitEUR: {label:"TBC/BOG EUR",  pill:"debit-eur"},
+    cash:     {label:"Cash",         pill:"cash"}
+  };
+  for (var j=0;j<sorted.length;j++){
+    var e = sorted[j];
+    var idx = state.expenses.indexOf(e);
+    var tr = document.createElement("tr");
+    var info = acctInfo[e.account] || acctInfo.cash;
+    var curr = e.currency || accountUnit(e.account);
+
+    var isIncomeRow = (e.type === "income");
+    var amountStr = (isIncomeRow ? "+" : "") + fmt(e.amount, 2) + " " + curr;
+    var rowRateINR = (e.rateUsed !== undefined && e.rateUsed !== null) ? e.rateUsed : r;
+    var rowRateUSD = (curr === "USD") ? ((e.rateUsed !== undefined && e.rateUsed !== null) ? e.rateUsed : ur) : null;
+    var rowRateEUR = (curr === "EUR") ? ((e.rateUsed !== undefined && e.rateUsed !== null) ? e.rateUsed : er) : null;
+    var converted = "—";
+    if (e.account === "credit" && rowRateINR){
+      converted = (isIncomeRow ? "+" : "") + "₹ " + fmt(e.amount * rowRateINR, 2);
+    } else if (curr === "USD" && rowRateUSD){
+      converted = (isIncomeRow ? "+" : "") + fmt(e.amount / rowRateUSD, 2) + " GEL";
+    } else if (curr === "EUR" && rowRateEUR){
+      converted = (isIncomeRow ? "+" : "") + fmt(e.amount / rowRateEUR, 2) + " GEL";
+    }
+    var labelSuffix = (e.account === "debitGEL" && curr !== "GEL") ? " (paid in " + curr + ")" : "";
+    if (isIncomeRow) labelSuffix += " · IN";
+
+    tr.appendChild(cell(e.date));
+    var tdA = document.createElement("td");
+    var pill = document.createElement("span");
+    pill.className = "pill " + (isIncomeRow ? "income" : info.pill);
+    pill.textContent = info.label + labelSuffix;
+    tdA.appendChild(pill);
+    tr.appendChild(tdA);
+    tr.appendChild(cell(e.category));
+    tr.appendChild(cell(e.note || ""));
+    tr.appendChild(cell(amountStr, "amt" + (isIncomeRow ? " income" : "")));
+    tr.appendChild(cell(converted, "amt" + (isIncomeRow ? " income" : "")));
+
+    var tdDel = document.createElement("td");
+    var del = document.createElement("button");
+    del.className = "del";
+    del.type = "button";
+    del.textContent = "✕";
+    del.title = "Delete this expense";
+    del.setAttribute("data-idx", String(idx));
+    del.addEventListener("click", function(ev){
+      var k = Number(ev.currentTarget.getAttribute("data-idx"));
+      state.expenses.splice(k, 1);
+      bump();
+      renderAll();
+      toast("Expense deleted");
+    });
+    tdDel.appendChild(del);
+    tr.appendChild(tdDel);
+
+    body.appendChild(tr);
+  }
+  $("txEmpty").style.display = state.expenses.length ? "none" : "block";
+
+  renderTrendChart(t);
+  renderCategoryCaps(t);
+  renderArchiveList();
+  renderUnsavedBanner();
+
+  // Export box
+  $("exportBox").value = buildExport();
+
+  if (typeof updateExpenseFormUI === "function"){ updateExpenseFormUI(); }
+}
+
+function renderUnsavedBanner(){
+  var banner = $("unsavedBanner");
+  if (unsavedChanges > 0){
+    $("unsavedText").textContent = unsavedChanges + " unsaved change" + (unsavedChanges === 1 ? "" : "s") + " — copy & send to WhatsApp so you don't lose them.";
+    banner.classList.add("show");
+  } else {
+    banner.classList.remove("show");
+  }
+}
+
+function renderTrendChart(t){
+  var container = $("trendChart");
+  var byDate = {};
+  for (var i=0;i<state.expenses.length;i++){
+    var e = state.expenses[i];
+    if (e.type === "income") continue;
+    var g = toGEL(Number(e.amount)||0, e.currency || accountUnit(e.account), e.rateUsed);
+    byDate[e.date] = (byDate[e.date] || 0) + g;
+  }
+  var dates = Object.keys(byDate).sort();
+  if (dates.length === 0){
+    container.innerHTML = "";
+    var emptyDiv = document.createElement("div");
+    emptyDiv.className = "trend-empty";
+    emptyDiv.textContent = "Add some expenses to see your spending trend.";
+    container.appendChild(emptyDiv);
+    return;
+  }
+  var vals = dates.map(function(d){ return byDate[d]; });
+  var maxVal = Math.max.apply(null, vals) || 1;
+  var w = 700, h = 190, padL = 44, padR = 14, padT = 14, padB = 30;
+  var plotW = w - padL - padR, plotH = h - padT - padB;
+  var stepX = dates.length > 1 ? plotW / (dates.length - 1) : 0;
+  var pts = dates.map(function(d, i){
+    var x = padL + i * stepX;
+    var y = padT + plotH * (1 - (byDate[d] / maxVal));
+    return {x: x, y: y, d: d, v: byDate[d]};
+  });
+  var polylinePts = pts.map(function(p){ return p.x.toFixed(1) + "," + p.y.toFixed(1); }).join(" ");
+
+  var svg = '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:100%;height:auto;font-family:inherit;">';
+  // gridlines + y labels (0, half, max)
+  [0, 0.5, 1].forEach(function(frac){
+    var gy = padT + plotH * (1 - frac);
+    svg += '<line x1="' + padL + '" y1="' + gy + '" x2="' + (w-padR) + '" y2="' + gy + '" stroke="var(--line)" stroke-width="1"/>';
+    svg += '<text x="' + (padL-6) + '" y="' + (gy+4) + '" font-size="10" fill="var(--grey)" text-anchor="end">' + fmt(maxVal*frac,0) + '</text>';
+  });
+  // area under line (subtle)
+  var areaPts = polylinePts + " " + (padL+plotW).toFixed(1) + "," + (padT+plotH) + " " + padL + "," + (padT+plotH);
+  svg += '<polygon points="' + areaPts + '" fill="var(--db-blue-light)" opacity="0.6"/>';
+  // line
+  svg += '<polyline points="' + polylinePts + '" fill="none" stroke="var(--db-blue)" stroke-width="2.5"/>';
+  // points + x labels (skip labels if too many)
+  var labelEvery = Math.max(1, Math.ceil(dates.length / 8));
+  pts.forEach(function(p, i){
+    svg += '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="3.5" fill="var(--db-blue)"><title>' + p.d + ': ' + fmt(p.v,2) + ' GEL</title></circle>';
+    if (i % labelEvery === 0 || i === pts.length-1){
+      svg += '<text x="' + p.x.toFixed(1) + '" y="' + (h-8) + '" font-size="10" fill="var(--grey)" text-anchor="middle">' + p.d.slice(5) + '</text>';
+    }
+  });
+  svg += '</svg>';
+  container.innerHTML = svg;
+}
+
+function renderCategoryCaps(t){
+  var container = $("categoryCapsContainer");
+  if (!container.hasChildNodes() || container.childNodes.length !== CATEGORY_LIST.length){
+    container.innerHTML = "";
+    for (var i=0;i<CATEGORY_LIST.length;i++){
+      var cat = CATEGORY_LIST[i];
+      var slug = slugify(cat);
+      var row = document.createElement("div");
+      row.className = "cap-row";
+      var lbl = document.createElement("label");
+      lbl.textContent = cat;
+      var inp = document.createElement("input");
+      inp.type = "number";
+      inp.min = "0";
+      inp.step = "1";
+      inp.placeholder = "no cap (GEL)";
+      inp.setAttribute("data-cat", cat);
+      inp.id = "cap-input-" + slug;
+      inp.value = state.categoryCaps[cat] ? state.categoryCaps[cat] : "";
+      inp.addEventListener("change", function(ev){
+        var c = ev.currentTarget.getAttribute("data-cat");
+        var v = parseFloat(ev.currentTarget.value);
+        if (isNaN(v) || v <= 0){ delete state.categoryCaps[c]; }
+        else { state.categoryCaps[c] = v; }
+        bump();
+        renderAll();
+      });
+      var barWrap = document.createElement("div");
+      barWrap.className = "cap-bar-wrap";
+      barWrap.id = "cap-bar-" + slug;
+      var barFill = document.createElement("div");
+      barFill.className = "cap-bar-fill";
+      barFill.id = "cap-fill-" + slug;
+      var barText = document.createElement("div");
+      barText.className = "cap-bar-text";
+      barText.id = "cap-text-" + slug;
+      barWrap.appendChild(barFill);
+      barWrap.appendChild(barText);
+      row.appendChild(lbl);
+      row.appendChild(inp);
+      row.appendChild(barWrap);
+      container.appendChild(row);
+    }
+  }
+  for (var j=0;j<CATEGORY_LIST.length;j++){
+    var c2 = CATEGORY_LIST[j];
+    var slug2 = slugify(c2);
+    var spent = t.byCat[c2] || 0;
+    var cap = state.categoryCaps[c2];
+    var fill = $("cap-fill-" + slug2);
+    var text = $("cap-text-" + slug2);
+    if (cap){
+      var pct = Math.min(100, (spent/cap)*100);
+      fill.style.width = pct + "%";
+      fill.style.background = pct < 70 ? "var(--green)" : (pct <= 100 ? "var(--amber)" : "var(--red)");
+      text.textContent = fmt(spent,0) + " / " + fmt(cap,0) + " GEL";
+    } else {
+      fill.style.width = spent > 0 ? "100%" : "0%";
+      fill.style.background = "var(--line)";
+      text.textContent = spent > 0 ? fmt(spent,0) + " GEL spent (no cap set)" : "no cap set";
+    }
+  }
+}
+
+function renderArchiveList(){
+  var container = $("archiveList");
+  container.innerHTML = "";
+  if (state.monthArchive.length === 0){
+    var e = document.createElement("div");
+    e.className = "hint";
+    e.style.marginTop = "0";
+    e.textContent = "No archived months yet.";
+    container.appendChild(e);
+    return;
+  }
+  var sorted = state.monthArchive.slice().reverse();
+  for (var i=0;i<sorted.length;i++){
+    var a = sorted[i];
+    var row = document.createElement("div");
+    row.className = "archive-row";
+    var lbl = document.createElement("span");
+    lbl.className = "lbl";
+    lbl.textContent = a.label;
+    var meta = document.createElement("span");
+    meta.className = "meta";
+    meta.textContent = fmt(a.totalGEL,2) + " GEL total · archived " + a.archivedAt;
+    row.appendChild(lbl);
+    row.appendChild(meta);
+    container.appendChild(row);
+  }
+}
+
+function accountUnit(acct){
+  if (acct === "debitUSD") return "USD";
+  if (acct === "debitEUR") return "EUR";
+  return "GEL"; // credit, debitGEL, cash all default to GEL
+}
+function updateExpenseFormUI(){
+  var acct = $("expAccount").value;
+  var isIncome = ($("expType").value === "income");
+  var showCurrencyPicker = (acct === "debitGEL");
+  $("expCurrencyWrap").style.display = showCurrencyPicker ? "" : "none";
+  $("expCategoryWrap").style.display = isIncome ? "none" : "";
+  $("incCategoryWrap").style.display = isIncome ? "" : "none";
+  $("expAccountLabel").textContent = isIncome ? "Into account" : "Paid with";
+  $("expCurrencyLabel").textContent = isIncome ? "Currency received" : "Currency of purchase";
+  $("btnAdd").textContent = isIncome ? "Add income" : "Add expense";
+
+  var unit = showCurrencyPicker ? $("expCurrency").value : accountUnit(acct);
+  $("expAmountLabel").textContent = "Amount (" + unit + ")";
+  $("expAmount").placeholder = "0.00";
+
+  var rateLine = "";
+  if (isIncome){
+    if (acct === "credit"){
+      $("expHint").textContent = "Card repayment: type the GEL-equivalent you paid off — it's added back to your available IndusInd limit.";
+      rateLine = state.rate !== null
+        ? "Current IndusInd rate: 1 GEL = " + fmt(state.rate,4) + " INR (1 INR = " + fmt(1/state.rate,7) + " GEL)"
+        : "No IndusInd rate set yet — use \"Set card rate\" above.";
+    } else if (unit === "GEL"){
+      $("expHint").textContent = "Money in — added straight to this account's balance.";
+      rateLine = "";
+    } else {
+      $("expHint").textContent = "Money in, received in " + unit + " — added to this account's balance (GEL-equivalent uses the current rate).";
+      var rti = unit === "USD" ? state.usdRate : state.eurRate;
+      rateLine = rti !== null
+        ? "Current rate: 1 GEL = " + fmt(rti,4) + " " + unit + " (1 " + unit + " = " + fmt(1/rti,4) + " GEL)"
+        : "No " + unit + " rate set yet — use \"Set " + unit + " rate\" above.";
+    }
+    $("expRatePreview").textContent = rateLine;
+    return;
+  }
+  if (acct === "credit"){
+    $("expHint").textContent = "Credit card entries: you type the amount in GEL, it is converted to INR at the confirmed card rate and deducted from the IndusInd balance.";
+    rateLine = state.rate !== null
+      ? "Current IndusInd rate: 1 GEL = " + fmt(state.rate,4) + " INR (1 INR = " + fmt(1/state.rate,7) + " GEL)"
+      : "No IndusInd rate set yet — use \"Set card rate\" above.";
+  } else if (acct === "debitGEL"){
+    if (unit === "GEL"){
+      $("expHint").textContent = "Direct GEL debit — deducted straight from the TBC/BOG GEL balance, no conversion.";
+      rateLine = "";
+    } else {
+      $("expHint").textContent = "Paid directly in " + unit + " on the GEL account — the bank auto-converts it, so this is tracked and deducted from the TBC/BOG GEL balance in GEL.";
+      var rt = unit === "USD" ? state.usdRate : state.eurRate;
+      rateLine = rt !== null
+        ? "Current rate: 1 GEL = " + fmt(rt,4) + " " + unit + " (1 " + unit + " = " + fmt(1/rt,4) + " GEL)"
+        : "No " + unit + " rate set yet — use \"Set " + unit + " rate\" above.";
+    }
+  } else if (acct === "debitUSD" || acct === "debitEUR"){
+    $("expHint").textContent = "Type the amount straight from your " + unit + " receipt — it's tracked in " + unit + " and shown converted to GEL at the current Visa/Mastercard rate.";
+    var rt2 = unit === "USD" ? state.usdRate : state.eurRate;
+    rateLine = rt2 !== null
+      ? "Current rate: 1 GEL = " + fmt(rt2,4) + " " + unit + " (1 " + unit + " = " + fmt(1/rt2,4) + " GEL)"
+      : "No " + unit + " rate set yet — use \"Set " + unit + " rate\" above.";
+  } else {
+    $("expHint").textContent = "Tracked directly in GEL.";
+    rateLine = "";
+  }
+  $("expRatePreview").textContent = rateLine;
+}
+
+function cell(text, cls){
+  var td = document.createElement("td");
+  if (cls) td.className = cls;
+  td.textContent = text;
+  return td;
+}
+function addStat(parent, k, v, cls){
+  var d = document.createElement("div");
+  d.className = "stat" + (cls ? " " + cls : "");
+  var ke = document.createElement("div"); ke.className = "k"; ke.textContent = k;
+  var ve = document.createElement("div"); ve.className = "v"; ve.textContent = v;
+  d.appendChild(ke); d.appendChild(ve);
+  parent.appendChild(d);
+}
+
+/* ================= Export / Import ================= */
+function buildExport(){
+  var t = totals();
+  var lines = [];
+  lines.push("SANGAM'S BANK " + todayStr());
+  lines.push("RATE: " + (state.rate !== null ? state.rate : 0) + " INR/GEL");
+  lines.push("USD RATE: " + (state.usdRate !== null ? state.usdRate : 0) + " USD/GEL");
+  lines.push("EUR RATE: " + (state.eurRate !== null ? state.eurRate : 0) + " EUR/GEL");
+  lines.push("INR RATE SET: " + (state.rateSetAt.INR || ""));
+  lines.push("USD RATE SET: " + (state.rateSetAt.USD || ""));
+  lines.push("EUR RATE SET: " + (state.rateSetAt.EUR || ""));
+  lines.push("CREDIT LIMIT GEL: " + state.creditLimitGEL);
+  lines.push("DEBIT GEL OPENING: " + state.openingDebitGEL);
+  lines.push("DEBIT USD OPENING: " + state.openingDebitUSD);
+  lines.push("DEBIT EUR OPENING: " + state.openingDebitEUR);
+  lines.push("CASH OPENING: " + state.openingCash);
+  lines.push("MONTHLY BUDGET GEL: " + state.monthlyBudgetGEL);
+  lines.push("-- CATEGORY CAPS --");
+  var capCats = Object.keys(state.categoryCaps);
+  for (var ci=0;ci<capCats.length;ci++){
+    lines.push(capCats[ci] + " : " + state.categoryCaps[capCats[ci]]);
+  }
+  lines.push("-- CATEGORY CAPS END --");
+  lines.push("-- ARCHIVE --");
+  for (var ai=0;ai<state.monthArchive.length;ai++){
+    var a = state.monthArchive[ai];
+    lines.push(a.label + " | " + a.archivedAt + " | " + a.totalGEL + " | " + a.creditGEL + " | " + a.debitGEL + " | " + a.debitUSD + " | " + a.debitEUR + " | " + a.cashGEL);
+  }
+  lines.push("-- ARCHIVE END --");
+  lines.push("-- EXPENSES --");
+  var expenseLines = [];
+  for (var i=0;i<state.expenses.length;i++){
+    var e = state.expenses[i];
+    var acctCode = e.account;
+    if (e.account === "debitGEL" && e.currency && e.currency !== "GEL"){
+      acctCode = "debitGEL:" + e.currency;
+    }
+    var rateField = (e.rateUsed !== undefined && e.rateUsed !== null) ? e.rateUsed : "";
+    var noteSafe = (e.note || "").replace(/\|/g, "/");
+    var amountField = (e.type === "income" ? "+" : "") + e.amount;
+    var expLine = e.date + " | " + acctCode + " | " + amountField + " | " + e.category + " | " + rateField + " | " + noteSafe;
+    expenseLines.push(expLine);
+    lines.push(expLine);
+  }
+  lines.push("-- END --");
+  lines.push("EXPENSE COUNT: " + state.expenses.length);
+  lines.push("CHECKSUM: " + simpleChecksum(expenseLines.join("\n")));
+  lines.push("");
+  lines.push("Summary: spent " + fmt(t.allGEL,2) + " GEL (credit " + fmt(t.spent.credit,2) +
+             " · debit " + fmt(t.spent.debitGEL,2) + " GEL + $" + fmt(t.spent.debitUSD,2) + " + €" + fmt(t.spent.debitEUR,2) +
+             " · cash " + fmt(t.spent.cash,2) + ")" +
+             (t.incomeGEL > 0 ? " · income +" + fmt(t.incomeGEL,2) + " GEL" : ""));
+  return lines.join("\n");
+}
+
+function importText(text){
+  var lines = text.split(/\r?\n/);
+  var next = {
+    rate: null, rateSource: "imported", usdRate: null, eurRate: null,
+    rateSetAt: {INR: null, USD: null, EUR: null},
+    creditLimitGEL: 400, openingDebitGEL: 0, openingDebitUSD: 0, openingDebitEUR: 0,
+    openingCash: 0, monthlyBudgetGEL: 0, categoryCaps: {}, monthArchive: [], expenses: []
+  };
+  var found = false;
+  var inCaps = false, inArchive = false;
+  var expectedCount = null, expectedChecksum = null;
+  var parsedExpenseLines = [];
+
+  for (var i=0;i<lines.length;i++){
+    var line = lines[i].trim();
+    if (!line) continue;
+
+    var m;
+    if (line === "-- CATEGORY CAPS --"){ inCaps = true; continue; }
+    if (line === "-- CATEGORY CAPS END --"){ inCaps = false; continue; }
+    if (line === "-- ARCHIVE --"){ inArchive = true; continue; }
+    if (line === "-- ARCHIVE END --"){ inArchive = false; continue; }
+
+    if (inCaps){
+      var capParts = line.split(":");
+      if (capParts.length >= 2){
+        var capCat = capParts[0].trim();
+        var capVal = parseFloat(capParts.slice(1).join(":").trim());
+        if (!isNaN(capVal) && capVal > 0){ next.categoryCaps[capCat] = capVal; found = true; }
+      }
+      continue;
+    }
+    if (inArchive){
+      var aParts = line.split("|");
+      if (aParts.length >= 8){
+        next.monthArchive.push({
+          label: aParts[0].trim(), archivedAt: aParts[1].trim(),
+          totalGEL: parseFloat(aParts[2])||0, creditGEL: parseFloat(aParts[3])||0,
+          debitGEL: parseFloat(aParts[4])||0, debitUSD: parseFloat(aParts[5])||0,
+          debitEUR: parseFloat(aParts[6])||0, cashGEL: parseFloat(aParts[7])||0
+        });
+        found = true;
+      }
+      continue;
+    }
+
+    if ((m = line.match(/^USD RATE:\s*([\d.]+)/i))){ next.usdRate = parseFloat(m[1]) || null; found = true; continue; }
+    if ((m = line.match(/^EUR RATE:\s*([\d.]+)/i))){ next.eurRate = parseFloat(m[1]) || null; found = true; continue; }
+    if ((m = line.match(/^RATE:\s*([\d.]+)/i))){ next.rate = parseFloat(m[1]) || null; found = true; continue; }
+    if ((m = line.match(/^INR RATE SET:\s*(\d{4}-\d{2}-\d{2})/i))){ next.rateSetAt.INR = m[1]; continue; }
+    if ((m = line.match(/^USD RATE SET:\s*(\d{4}-\d{2}-\d{2})/i))){ next.rateSetAt.USD = m[1]; continue; }
+    if ((m = line.match(/^EUR RATE SET:\s*(\d{4}-\d{2}-\d{2})/i))){ next.rateSetAt.EUR = m[1]; continue; }
+    if ((m = line.match(/^CREDIT LIMIT GEL:\s*([\d.]+)/i))){ next.creditLimitGEL = parseFloat(m[1]) || 400; found = true; continue; }
+    if ((m = line.match(/^DEBIT GEL OPENING:\s*(-?[\d.]+)/i))){ next.openingDebitGEL = parseFloat(m[1]) || 0; found = true; continue; }
+    if ((m = line.match(/^DEBIT USD OPENING:\s*(-?[\d.]+)/i))){ next.openingDebitUSD = parseFloat(m[1]) || 0; found = true; continue; }
+    if ((m = line.match(/^DEBIT EUR OPENING:\s*(-?[\d.]+)/i))){ next.openingDebitEUR = parseFloat(m[1]) || 0; found = true; continue; }
+    // backward compatibility with the old single-currency export
+    if ((m = line.match(/^DEBIT OPENING:\s*(-?[\d.]+)/i))){ next.openingDebitGEL = parseFloat(m[1]) || 0; found = true; continue; }
+    if ((m = line.match(/^CASH OPENING:\s*(-?[\d.]+)/i))){ next.openingCash = parseFloat(m[1]) || 0; found = true; continue; }
+    if ((m = line.match(/^MONTHLY BUDGET GEL:\s*(-?[\d.]+)/i))){ next.monthlyBudgetGEL = parseFloat(m[1]) || 0; continue; }
+    if ((m = line.match(/^EXPENSE COUNT:\s*(\d+)/i))){ expectedCount = parseInt(m[1],10); continue; }
+    if ((m = line.match(/^CHECKSUM:\s*(\d+)/i))){ expectedChecksum = parseInt(m[1],10); continue; }
+
+    // Expense line — NEW format: date | account[:CURRENCY] | amount | category | rateUsed | note
+    // OLD format (backward compat, no rateUsed field): date | account | amount | category | note
+    var parts = line.split("|");
+    if (parts.length >= 4){
+      var date = parts[0].trim();
+      var acctRaw = parts[1].trim();
+      var acct, foreignCurr = null;
+      if (acctRaw.indexOf(":") !== -1){
+        var sp = acctRaw.split(":");
+        acct = sp[0].trim();
+        foreignCurr = sp[1].trim().toUpperCase();
+      } else {
+        acct = acctRaw;
+      }
+      var acctLower = acct.toLowerCase();
+      // backward compatibility: old exports used bare "debit" for the GEL debit account
+      if (acctLower === "debit") acct = "debitGEL";
+      var amtRaw = parts[2].trim();
+      var entryType = (amtRaw.charAt(0) === "+") ? "income" : "expense";
+      var amt = parseFloat(amtRaw);
+      var cat = parts[3].trim();
+      var rateUsedParsed = null, note = "";
+      if (parts.length >= 6){
+        // new format: rateUsed at index 4, note is everything from index 5 on
+        var rateStr = parts[4].trim();
+        var rateParsedNum = parseFloat(rateStr);
+        rateUsedParsed = (rateStr === "" || isNaN(rateParsedNum)) ? null : rateParsedNum;
+        note = parts.slice(5).join("|").trim();
+      } else if (parts.length === 5){
+        // old format: note at index 4, no rateUsed
+        note = parts[4].trim();
+      }
+      var validAccounts = ["credit","debitGEL","debitUSD","debitEUR","cash"];
+      if (/^\d{4}-\d{2}-\d{2}$/.test(date) &&
+          validAccounts.indexOf(acct) !== -1 &&
+          !isNaN(amt) && amt >= 0){
+        var currency = (acct === "debitGEL" && (foreignCurr === "USD" || foreignCurr === "EUR"))
+          ? foreignCurr
+          : accountUnit(acct);
+        next.expenses.push({date: date, account: acct, category: cat || "Misc", note: note, amount: amt, currency: currency, rateUsed: rateUsedParsed, type: entryType});
+        var amtFieldForChecksum = (entryType === "income" ? "+" : "") + amt;
+        var reconstructed;
+        if (parts.length >= 6){
+          reconstructed = date + " | " + acctRaw + " | " + amtFieldForChecksum + " | " + cat + " | " + parts[4].trim() + " | " + note;
+        } else {
+          reconstructed = date + " | " + acctRaw + " | " + amtFieldForChecksum + " | " + cat + " | " + note; // matches the previous export version's 5-field format
+        }
+        parsedExpenseLines.push(reconstructed);
+        found = true;
+      }
+    }
+  }
+
+  if (!found) return {ok: false, count: 0, expectedCount: null, checksumMatch: null};
+
+  var actualChecksum = simpleChecksum(parsedExpenseLines.join("\n"));
+  var checksumMatch = (expectedChecksum === null) ? null : (actualChecksum === expectedChecksum);
+  var countMatch = (expectedCount === null) ? null : (next.expenses.length === expectedCount);
+
+  if (next.rate === null || next.rate === 0){ next.rate = state.rate; next.rateSource = state.rateSource; }
+  if (next.usdRate === null || next.usdRate === 0){ next.usdRate = state.usdRate; }
+  if (next.eurRate === null || next.eurRate === 0){ next.eurRate = state.eurRate; }
+  state = next;
+  return {ok: true, count: next.expenses.length, expectedCount: expectedCount, checksumMatch: checksumMatch, countMatch: countMatch};
+}
+
+/* ================= Opening balances ================= */
+function editOpening(which){
+  var map = {
+    debitGEL: {current: state.openingDebitGEL, label: "TBC/BOG debit (GEL)", unit: "GEL"},
+    debitUSD: {current: state.openingDebitUSD, label: "TBC/BOG debit (USD)", unit: "USD"},
+    debitEUR: {current: state.openingDebitEUR, label: "TBC/BOG debit (EUR)", unit: "EUR"},
+    cash:     {current: state.openingCash,     label: "cash",                unit: "GEL"}
+  };
+  var info = map[which];
+  if (!info) return;
+  openValueModal(
+    "Edit opening balance",
+    "Opening balance for " + info.label + ".",
+    "Amount (" + info.unit + ")",
+    info.current,
+    function(n){
+      if (which === "debitGEL") state.openingDebitGEL = n;
+      else if (which === "debitUSD") state.openingDebitUSD = n;
+      else if (which === "debitEUR") state.openingDebitEUR = n;
+      else state.openingCash = n;
+      bump();
+      renderAll();
+      toast("Opening balance updated");
+    }
+  );
+}
+
+function editMonthlyBudget(){
+  openValueModal(
+    "Set monthly budget",
+    "Your target spend for this calendar month, in GEL. Set to 0 to clear it.",
+    "Budget (GEL)",
+    state.monthlyBudgetGEL || "",
+    function(n){
+      state.monthlyBudgetGEL = n;
+      bump();
+      renderAll();
+      toast(n > 0 ? "Monthly budget set to " + fmt(n,2) + " GEL" : "Monthly budget cleared");
+    }
+  );
+}
+
+function doRollover(){
+  openConfirmModal(
+    "Archive month & start fresh?",
+    "Archives this month's totals and starts a new one. Leftover balances carry forward as new openings; rates, budget and category caps stay as they are.",
+    "Archive",
+    function(){
+      var t = totals();
+      var label = new Date().toLocaleDateString("en-US", {month:"long", year:"numeric"});
+      state.monthArchive.push({
+        label: label, archivedAt: todayStr(),
+        totalGEL: t.allGEL, creditGEL: t.creditGEL, debitGEL: t.debitGEL,
+        debitUSD: t.debitUSD, debitEUR: t.debitEUR, cashGEL: t.cashGEL
+      });
+      state.openingDebitGEL = state.openingDebitGEL - t.debitGEL;
+      state.openingDebitUSD = state.openingDebitUSD - t.debitUSD;
+      state.openingDebitEUR = state.openingDebitEUR - t.debitEUR;
+      state.openingCash = state.openingCash - t.cashGEL;
+      state.expenses = [];
+      bump();
+      renderAll();
+      toast("Month archived — balances carried forward.");
+    }
+  );
+}
+
+function doCopyExport(){
+  var box = $("exportBox");
+  box.select();
+  box.setSelectionRange(0, 999999);
+  var ok = false;
+  try { ok = document.execCommand("copy"); } catch(e){}
+  if (!ok && navigator.clipboard){
+    navigator.clipboard.writeText(box.value).then(
+      function(){ unsavedChanges = 0; renderAll(); toast("Copied! Paste it into WhatsApp."); },
+      function(){ toast("Couldn't copy — select the text and copy manually."); }
+    );
+    return;
+  }
+  if (ok){ unsavedChanges = 0; renderAll(); }
+  toast(ok ? "Copied! Paste it into WhatsApp." : "Couldn't copy — select and copy manually.");
+}
+
+
+/* ================= Events ================= */
+document.addEventListener("DOMContentLoaded", function(){
+  $("todayLabel").textContent = new Date().toDateString();
+  $("expDate").value = todayStr();
+
+  // Opening-balance edit buttons (data-which, no inline onclick)
+  var editButtons = document.querySelectorAll(".edit-open");
+  for (var eb=0; eb<editButtons.length; eb++){
+    editButtons[eb].addEventListener("click", function(ev){
+      editOpening(ev.currentTarget.getAttribute("data-which"));
+    });
+  }
+
+  $("expAccount").addEventListener("change", updateExpenseFormUI);
+  $("expCurrency").addEventListener("change", updateExpenseFormUI);
+  $("expType").addEventListener("change", updateExpenseFormUI);
+  updateExpenseFormUI();
+
+  function performAddExpense(date, acct, category, note, amt, currency, rateUsed, type){
+    state.expenses.push({
+      date: date, account: acct, category: category, note: note,
+      amount: amt, currency: currency, rateUsed: rateUsed, type: type || "expense"
+    });
+    $("expAmount").value = "";
+    $("expNote").value = "";
+    bump();
+    renderAll();
+    updateExpenseFormUI();
+    toast(type === "income" ? "Income added" : "Expense added");
+  }
+
+  $("btnAdd").addEventListener("click", function(){
+    var date = $("expDate").value || todayStr();
+    var amt = parseFloat($("expAmount").value);
+    var acct = $("expAccount").value;
+    var type = $("expType").value;
+    var currency = (acct === "debitGEL") ? $("expCurrency").value : accountUnit(acct);
+    var category = (type === "income") ? $("incCategory").value : $("expCategory").value;
+    var note = $("expNote").value.trim();
+    if (isNaN(amt) || amt <= 0){ toast("Enter an amount in " + currency + " first"); return; }
+
+    var rateUsed = null;
+    if (acct === "credit"){ rateUsed = state.rate; }
+    else if (currency === "USD"){ rateUsed = state.usdRate; }
+    else if (currency === "EUR"){ rateUsed = state.eurRate; }
+
+    if (findDuplicate(date, category, amt, currency, type)){
+      openConfirmModal(
+        "Possible duplicate",
+        "You already logged " + fmt(amt,2) + " " + currency + " for " + category + " on " + date + ". Add it again anyway?",
+        "Add anyway",
+        function(){ performAddExpense(date, acct, category, note, amt, currency, rateUsed, type); }
+      );
+      return;
+    }
+    performAddExpense(date, acct, category, note, amt, currency, rateUsed, type);
+  });
+
+  $("btnReloadRate").addEventListener("click", function(){ fetchRate(["INR"]); });
+  $("btnReloadFX").addEventListener("click", function(){ fetchRate(["USD","EUR"]); });
+  $("btnManualRate").addEventListener("click", function(){ inQueueFlow = false; openManualModal("INR"); });
+  $("btnManualUSD").addEventListener("click", function(){ inQueueFlow = false; openManualModal("USD"); });
+  $("btnManualEUR").addEventListener("click", function(){ inQueueFlow = false; openManualModal("EUR"); });
+
+  $("btnRateYes").addEventListener("click", function(){
+    if (currentConfirmCurrency === "INR"){
+      state.rate = currentConfirmLiveVal;
+      state.rateSource = "live-confirmed";
+      state.rateSetAt.INR = todayStr();
+    } else if (currentConfirmCurrency === "USD"){
+      state.usdRate = currentConfirmLiveVal;
+      state.rateSetAt.USD = todayStr();
+    } else if (currentConfirmCurrency === "EUR"){
+      state.eurRate = currentConfirmLiveVal;
+      state.rateSetAt.EUR = todayStr();
+    }
+    bump();
+    $("rateOverlay").classList.remove("show");
+    renderAll();
+    updateExpenseFormUI();
+    confirmIndex++;
+    processNextConfirm();
+  });
+  $("btnRateNo").addEventListener("click", function(){
+    $("rateOverlay").classList.remove("show");
+    openManualModal(currentConfirmCurrency); // inQueueFlow stays true so Save advances the queue
+  });
+
+  $("btnManualSave").addEventListener("click", function(){
+    var n = parseFloat($("manualRateInput").value);
+    if (isNaN(n) || n <= 0){ toast("Enter a valid rate"); return; }
+    var dir = $("manualDirection").value;
+    var canonical = dir === "fwd" ? n : (1 / n);
+    if (manualCurrency === "INR"){
+      state.rate = canonical;
+      state.rateSource = "manual";
+      state.rateSetAt.INR = todayStr();
+      toast("INR rate saved: 1 GEL = " + fmt(canonical,4) + " INR (1 INR = " + fmt(1/canonical,7) + " GEL)");
+    } else if (manualCurrency === "USD"){
+      state.usdRate = canonical;
+      state.rateSetAt.USD = todayStr();
+      toast("USD rate saved: 1 GEL = " + fmt(canonical,4) + " USD (1 USD = " + fmt(1/canonical,4) + " GEL)");
+    } else if (manualCurrency === "EUR"){
+      state.eurRate = canonical;
+      state.rateSetAt.EUR = todayStr();
+      toast("EUR rate saved: 1 GEL = " + fmt(canonical,4) + " EUR (1 EUR = " + fmt(1/canonical,4) + " GEL)");
+    }
+    bump();
+    $("manualOverlay").classList.remove("show");
+    renderAll();
+    updateExpenseFormUI();
+    if (inQueueFlow){
+      confirmIndex++;
+      processNextConfirm();
+    }
+  });
+  $("manualDirection").addEventListener("change", updateManualLabel);
+  $("manualRateInput").addEventListener("input", updateManualPreview);
+  $("btnManualCancel").addEventListener("click", function(){
+    $("manualOverlay").classList.remove("show");
+    if (inQueueFlow){
+      confirmIndex++;
+      processNextConfirm();
+    }
+  });
+
+  $("btnCopy").addEventListener("click", doCopyExport);
+  $("btnCopyFromBanner").addEventListener("click", doCopyExport);
+
+  $("btnWhatsApp").addEventListener("click", function(){
+    var url = "https://wa.me/?text=" + encodeURIComponent($("exportBox").value);
+    window.open(url, "_blank");
+    unsavedChanges = 0;
+    renderAll();
+  });
+
+  $("btnImport").addEventListener("click", function(){
+    var text = $("importBox").value;
+    if (!text.trim()){ toast("Paste your saved text first"); return; }
+    var result = importText(text);
+    if (result.ok){
+      unsavedChanges = 0;
+      renderAll();
+      updateExpenseFormUI();
+      $("importBox").value = "";
+      var hint = $("importResultHint");
+      if (result.checksumMatch === false || result.countMatch === false){
+        hint.textContent = "Imported " + result.count + " expenses, but this doesn't match what was exported (expected " + result.expectedCount + ") — some data may be missing. Check your paste.";
+        hint.style.color = "var(--red)";
+        toast("Imported, but the count/checksum doesn't match — please double-check!");
+      } else if (result.checksumMatch === true){
+        hint.textContent = "Imported " + result.count + " expenses — checksum verified ✓. Importing replaces the current data; unrecognised lines are ignored.";
+        hint.style.color = "";
+        toast("Imported " + result.count + " expenses ✓");
+      } else {
+        hint.textContent = "Imported " + result.count + " expenses. Importing replaces the current data; unrecognised lines are ignored.";
+        hint.style.color = "";
+        toast("Imported " + result.count + " expenses");
+      }
+    } else {
+      toast("Couldn't find any Sangam's Bank data in that text");
+    }
+  });
+
+  $("btnSetBudget").addEventListener("click", editMonthlyBudget);
+  $("btnRollover").addEventListener("click", doRollover);
+
+  $("btnClear").addEventListener("click", function(){
+    openConfirmModal(
+      "Clear all data?",
+      "This clears ALL expenses and balances. This cannot be undone (unless you saved an export).",
+      "Clear everything",
+      function(){
+        var keepRate = state.rate, keepSrc = state.rateSource, keepUsd = state.usdRate, keepEur = state.eurRate, keepSetAt = state.rateSetAt;
+        var keepBudget = state.monthlyBudgetGEL, keepCaps = state.categoryCaps, keepArchive = state.monthArchive;
+        state = {
+          rate: keepRate, rateSource: keepSrc, usdRate: keepUsd, eurRate: keepEur, rateSetAt: keepSetAt,
+          creditLimitGEL: 400, openingDebitGEL: 0, openingDebitUSD: 0, openingDebitEUR: 0,
+          openingCash: 0, monthlyBudgetGEL: keepBudget, categoryCaps: keepCaps, monthArchive: keepArchive, expenses: []
+        };
+        bump();
+        renderAll();
+        updateExpenseFormUI();
+        toast("All data cleared");
+      }
+    );
+  });
+
+  $("btnValueSave").addEventListener("click", function(){
+    var n = parseFloat($("valueModalInput").value);
+    if (isNaN(n)){ toast("That's not a number"); return; }
+    $("valueOverlay").classList.remove("show");
+    if (valueModalCallback){ valueModalCallback(n); }
+    valueModalCallback = null;
+  });
+  $("btnValueCancel").addEventListener("click", function(){
+    $("valueOverlay").classList.remove("show");
+    valueModalCallback = null;
+  });
+
+  $("btnConfirmYes").addEventListener("click", function(){
+    $("confirmOverlay").classList.remove("show");
+    if (confirmModalCallback){ confirmModalCallback(); }
+    confirmModalCallback = null;
+  });
+  $("btnConfirmNo").addEventListener("click", function(){
+    $("confirmOverlay").classList.remove("show");
+    confirmModalCallback = null;
+  });
+
+  renderAll();
+  fetchRate(["INR","USD","EUR"]); // on load, confirm all three rates in sequence
+});
+</script>
+</body>
+</html>
